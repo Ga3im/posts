@@ -1,19 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState, type Dispatch } from "react";
 
-export const Dropdown = ({ list = [10, 20, 50, 100, "все"] }) => {
-  const [value, setValue] = useState<number | string>("");
+type DropdownType = {
+  list: (number | string)[];
+  dropDownValue: number | string;
+  setDropDownValue: Dispatch<number | string>;
+};
 
-  const handleClick = (
-    event: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>
-  ) => {
-    setValue(event.target.value);
-  };
-  console.log(value);
+export const Dropdown = ({
+  list = [],
+  dropDownValue,
+  setDropDownValue,
+}: DropdownType) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    setDropDownValue(list[0]);
+  }, []);
+
   return (
-    <div className="appearance-none outline-none" onClick={handleClick}>
-      {list.map((set: number) => (
-        <div className="bg-none">{set}</div>
-      ))}
+    <div className="cursor-pointer relative" onClick={() => setIsOpen(!isOpen)}>
+      {dropDownValue}
+      <div className="opacity-100 absolute z-10 bg-black shadow-[0px_0px_15px_-5px] rounded-[10px] top-[32px] right-[-15px]">
+        {isOpen &&
+          list.map((set: number) => (
+            <div
+              onClick={() => setDropDownValue(set)}
+              className="cursor-pointer hover:bg-[#343434] hover:text-[#fff] py-[5px] px-[5px]"
+            >
+              {set}
+            </div>
+          ))}
+      </div>
     </div>
   );
 };

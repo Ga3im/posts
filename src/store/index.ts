@@ -6,14 +6,16 @@ import {
 } from "react-redux";
 import { postReduser } from "./postSlice";
 import { postApi } from "../services/postApi";
+import { userApi } from "../services/userApi";
 
 const store = configureStore({
   reducer: {
     post: postReduser,
     [postApi.reducerPath]: postApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(postApi.middleware),
+    getDefaultMiddleware().concat(postApi.middleware, userApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
