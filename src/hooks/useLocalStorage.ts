@@ -1,6 +1,8 @@
-export const useSaveLS = () => {
+export const useLocalStorage = () => {
   const setToLS = (name: string, value: any) => {
-    JSON.stringify(localStorage.setItem(`${name}`, value));
+    console.log("SETTING TO LS:", name, value);
+    const stringValue = JSON.stringify(value);
+    localStorage.setItem(name, stringValue);
   };
 
   const getfromLS = (name: string) => {

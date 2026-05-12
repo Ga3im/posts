@@ -1,5 +1,23 @@
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../store";
+import { setFavoritePosts, setSelectedPosts } from "../store/postSlice";
 import type { User } from "../types/types";
+import { RoundCheckbox } from "./Checkbox";
 import { ExpandableText } from "./ExpandableText";
+import {
+  useDeletePostMutation,
+  useGetCommentPostQuery,
+  useUpdatePostMutation,
+} from "../services/postApi";
+import { UserIcon } from "./icons/UserIcon";
+import { CommentIcon } from "./icons/CommentIcon";
+import { EditIcon } from "./icons/EditIcon";
+import { FavoriteIcon } from "./icons/FavoriteIcon";
+import { DeleteIcon } from "./icons/DeleteIcon";
+import { SuccessIcon } from "./icons/SuccessIcon";
+import { CloseIcon } from "./icons/CloseIcon";
+import { ModalClose } from "./CloseModal";
+import { LoaderIcon } from "./icons/LoaderIcon";
 
 export type Post = {
   userId: number;
@@ -9,53 +27,180 @@ export type Post = {
 };
 
 type PostCardType = {
-  item: Post;
+  post: Post;
   users: User[];
+  currentPage: number;
+  dropDownValue: number | string;
 };
 
-export const PostCard = ({ item, users }: PostCardType) => {
-  const UserIcon = () => (
-    <svg
-      width="40"
-      height="40"
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://w3.org"
-    >
-      <circle cx="20" cy="20" r="15" fill="#1e293b" />
+export const PostCard = ({
+  post,
+  users,
+  currentPage,
+  dropDownValue,
+}: PostCardType) => {
+  const [openComment, setOpenComment] = useState<null | number>(null);
+  const [isDelete, setIsDelete] = useState<boolean>(false);
+  const [editPost, setEditPost] = useState<Post | null>(null);
+  const [updatePost, { isLoading: isEditLoading }] = useUpdatePostMutation();
 
-      <g transform="translate(10, 10)">
-        <path
-          d="M16 17v-1.5a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3V17"
-          stroke="white"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <circle cx="10" cy="7" r="3.5" stroke="white" stroke-width="1.5" />
-      </g>
-    </svg>
+  const { selectedPosts, favoritePosts, currentUser } = useAppSelector(
+    (state) => state.post
   );
+  const dispatch = useAppDispatch();
 
-  if (!item) {
+  const { data: postComments } = useGetCommentPostQuery({
+    postId: openComment,
+  });
+
+  const [deletePost] = useDeletePostMutation();
+
+  const handleUpdate = async () => {
+    if (!editPost) return;
+
+    try {
+      await updatePost({
+        post: editPost, // Берем из локального стейта
+        page: currentPage,
+        limit: dropDownValue,
+      }).unwrap();
+
+      setEditPost(null);
+    } catch (err) {
+      console.error("Ошибка обновления:", err);
+    }
+  };
+
+  if (!post) {
     return null;
   }
 
-  console.log(users);
+  const handleCommentClick = () => {
+    if (openComment) {
+      setOpenComment(null);
+    } else {
+      setOpenComment(post.id);
+    }
+  };
 
-  let userName = users.find((user) => user.id === item.userId);
+  const handleEditClick = () => {
+    setEditPost(editPost ? null : post);
+  };
 
-  console.log(userName);
+  const handleDelete = () => {
+    deletePost({
+      id: post.id,
+      page: currentPage, // Передаем текущую страницу
+      limit: dropDownValue, // Передаем текущий лимит
+    });
+    setIsDelete(false);
+  };
+
+  let userName = users.find((user) => user.id === post.userId);
+  let isFavorite = favoritePosts.some((item) => item.id === post.id);
+  let isMyPost = currentUser?.id === post.userId;
+  let editingPost = editPost?.id === post.id;
 
   return (
-    <div className="rounded-[10px] bg-[#484848] p-[10px]">
-      <div className="flex items-center">
-        <UserIcon /> <p>{userName?.username}</p>
+    <>
+      {isDelete && (
+        <ModalClose
+          text={"Вы хотите удалить пост?"}
+          clickNo={() => setIsDelete(false)}
+          clickYes={handleDelete}
+        />
+      )}
+      <div className="rounded-[10px] bg-[#484848] p-[10px]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <UserIcon /> <p>{userName?.username}</p>
+          </div>
+          <RoundCheckbox
+            checked={selectedPosts.some((item) => item.id === post.id)}
+            onChange={() => dispatch(setSelectedPosts(post))}
+          />
+        </div>
+        {editingPost ? (
+          <textarea
+            rows={3}
+            value={editPost?.title || ""}
+            onChange={(e) =>
+              setEditPost(
+                editPost ? { ...editPost, title: e.target.value } : null
+              )
+            }
+            className="w-full text-[20px] px-[5px] py-[2px] text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          />
+        ) : (
+          <h2 className="text-start pl-[10px]">{post.title}</h2>
+        )}
+        <div className="p-[10px] text-justify">
+          {editingPost ? (
+            <textarea
+              rows={4}
+              value={editPost?.body || ""}
+              onChange={(e) =>
+                setEditPost(
+                  editPost ? { ...editPost, body: e.target.value } : null
+                )
+              }
+              className="w-full px-[5px] py-[2px] text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          ) : (
+            <ExpandableText>{post.body}</ExpandableText>
+          )}
+        </div>
+        <div className="flex justify-between px-[20px] pt-[10px]">
+          {editingPost ? (
+            <>
+              <button onClick={handleUpdate}>
+                {isEditLoading ? <LoaderIcon /> : <SuccessIcon />}
+              </button>
+              <button onClick={() => setEditPost(null)}>
+                <CloseIcon />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleCommentClick}
+                className="flex items-center"
+              >
+                <CommentIcon isActive={openComment ? true : false} />
+              </button>
+              {isMyPost && (
+                <button onClick={handleEditClick}>
+                  <EditIcon />
+                </button>
+              )}
+
+              <button onClick={() => dispatch(setFavoritePosts(post))}>
+                <FavoriteIcon isFavorite={isFavorite} />
+              </button>
+              {isMyPost && (
+                <button onClick={() => setIsDelete(!isDelete)}>
+                  <DeleteIcon />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {openComment && (
+          <div className="pt-[10px] px-[20px]">
+            {postComments.map((comment) => (
+              <div
+                key={comment.id}
+                className="border-b-1 text-start pt-[8px] pb-[3px]"
+              >
+                <h3 className="text-white">{comment.name}</h3>
+                <p className="text-[10px]">{comment.email}</p>
+                <p className="text-justify">{comment.body}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      <h2 className="text-start pl-[10px]">{item.title}</h2>
-      <div className="p-[10px] text-justify">
-        <ExpandableText>{item.body}</ExpandableText>
-      </div>
-    </div>
+    </>
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch } from "react";
+import {  useState, type Dispatch } from "react";
 
 type DropdownType = {
   list: (number | string)[];
@@ -12,10 +12,6 @@ export const Dropdown = ({
   setDropDownValue,
 }: DropdownType) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    setDropDownValue(list[0]);
-  }, []);
 
   return (
     <div className="cursor-pointer relative" onClick={() => setIsOpen(!isOpen)}>

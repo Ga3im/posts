@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import store from "./store";
 import { PostPage } from "./pages/PostPage";
 import { routes } from "./pages/routes";
+import { UserListPage } from "./pages/UserListPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path={routes.main} element={<Main />}>
             <Route path={routes.post} element={<PostPage />} />
+            <Route path={routes.users} element={<UserListPage />} />
           </Route>
         </Routes>
       </Provider>

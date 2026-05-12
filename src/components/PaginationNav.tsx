@@ -1,35 +1,11 @@
 import type { Dispatch } from "react";
-import { useSaveLS } from "../hooks/useSaveLS";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { ChevronLeft } from "./icons/ChevronLeft";
+import { ChevronRight } from "./icons/ChevronRight";
 
-const ChevronLeft = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
 
-const ChevronRight = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
+
+
 
 type PaginationNavType = {
   currentPage: number;
@@ -42,7 +18,7 @@ export const PaginationNav = ({
   setCurrentPage,
   totalPages,
 }: PaginationNavType) => {
-  const { setToLS } = useSaveLS();
+  const { setToLS } = useLocalStorage();
 
   const handleSetCurrenPage = (newValue: number) => {
     setCurrentPage(newValue);
