@@ -6,7 +6,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 export type sliceType = {
   selectedPosts: Post[];
   favoritePosts: Post[];
-  currentUser: User;
+  currentUser: User | null;
 };
 
 const { getfromLS, setToLS, removeItemLS } = useLocalStorage();
