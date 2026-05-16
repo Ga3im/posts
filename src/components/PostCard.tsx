@@ -114,7 +114,7 @@ export const PostCard = ({
       <div className="rounded-[10px] bg-[#484848] p-[10px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <UserIcon /> <p>{post?.user.username}</p>
+            <UserIcon /> <p>{post?.user?.username}</p>
           </div>
           <RoundCheckbox
             checked={selectedPosts.some((item) => item.id === post.id)}

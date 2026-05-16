@@ -49,11 +49,11 @@ export const postSlice = createSlice({
       }
       setToLS("favoritePosts", state.favoritePosts);
     },
-    selectUser: (state, action: PayloadAction<User>) => {
+    selectUser: (state, action: PayloadAction<User | null>) => {
       state.currentUser = action.payload;
       setToLS("currentUser", state.currentUser);
     },
-    
+
     toggleBulkFavorites: (state) => {
       const selectedIds = state.selectedPosts.map((p) => p.id);
       const allSelectedAreFavorites = state.selectedPosts.every((post) =>
