@@ -11,7 +11,7 @@ export const Header = () => {
   const { currentUser } = useAppSelector((state) => state.post);
 
   return (
-    <div className="flex justify-between items-center fixed w-full h-[50px] px-[10px] py-[5px] z-10 bg-black/5">
+    <div className="flex top-0 inset-x-0 justify-between items-center fixed h-[50px] px-[10px] py-[5px] z-10 bg-black/5">
       <button onClick={() => navigate(routes.post)}>
         <LogoIcon />
       </button>

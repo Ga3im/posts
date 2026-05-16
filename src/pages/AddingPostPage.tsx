@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppSelector } from "../store";
 import type { Post } from "../components/PostCard";
-import { useNavigate, useLocation } from "react-router-dom"; // Добавили useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAddPostMutation } from "../services/postApi";
 import { CloseIcon } from "../components/icons/CloseIcon";
 import { routes } from "./routes";
@@ -9,10 +9,9 @@ import { routes } from "./routes";
 export const AddingPostPage = () => {
   const { currentUser } = useAppSelector((state) => state.post);
   const navigate = useNavigate();
-  const location = useLocation(); // Перехватываем state из роутера
+  const location = useLocation(); 
   const [addPost, { isLoading }] = useAddPostMutation();
 
-  // Достаем переданные параметры или берем дефолтные значения на случай, если зашли по прямой ссылке
   const page = location.state?.currentPage || 1;
   const limit = location.state?.dropDownValue || 10;
   const search = location.state?.searchTerm || "";
@@ -35,7 +34,6 @@ export const AddingPostPage = () => {
       return;
     }
     try {
-      // ИСПРАВЛЕНО: Передаем объект аргументов в соответствии с новым типом в API
       await addPost({ 
         post: addingPost, 
         page, 
@@ -50,7 +48,7 @@ export const AddingPostPage = () => {
   };
 
   return (
-    <div className="fixed z-10 bg-black/50 w-full h-full flex justify-center items-center">
+    <div className="fixed top-[0px] left-[0px] z-10 bg-black/50 w-full h-full flex justify-center items-center">
       <div className="w-full mx-[20px] max-w-md bg-[#16171d] rounded-[10px] p-[20px] text-[#fff] shadow-[0px_0px_10px_-5px]">
         <div className="flex justify-end">
           <button onClick={() => navigate(-1)}>

@@ -64,7 +64,7 @@ export const FilterPosts = ({
               onChange={(e) => setIsOnlyFavorites(e.target.checked)}
               className="w-4 h-4 rounded text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500 focus:ring-2 accent-blue-500"
             />
-            <span>Сначала избранные ★ (Клиентский фильтр)</span>
+            <span>Сначала избранные ★</span>
           </label>
 
           <div className="flex flex-col gap-3">
