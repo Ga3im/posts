@@ -36,9 +36,9 @@ export const ScrollToTop = ({ onClick }: ScrollToTopType) => {
       {isScroll && (
         <button
           onClick={onClick}
-          className="fixed cursor-pointer bottom-[20px] right-[10px] rounded-full bg-black px-[5px] shadow-[0px_0px_10px_-3px]"
+          className="fixed cursor-pointer bottom-[70px] right-[18px] rounded-full bg-black w-[25px] h-[25px] shadow-[0px_0px_10px_-3px]"
         >
-          Наверх
+          &#8593;
         </button>
       )}
     </>

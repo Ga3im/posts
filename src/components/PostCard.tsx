@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store";
 import { setFavoritePosts, setSelectedPosts } from "../store/postSlice";
-import type { User } from "../types/types";
 import { RoundCheckbox } from "./Checkbox";
 import { ExpandableText } from "./ExpandableText";
 import {
@@ -24,18 +23,21 @@ export type Post = {
   id: number;
   title: string;
   body: string;
+  user?: {
+    id: number;
+    name: string;
+    username: string;
+  };
 };
 
 type PostCardType = {
   post: Post;
-  users: User[];
   currentPage: number;
   dropDownValue: number | string;
 };
 
 export const PostCard = ({
   post,
-  users,
   currentPage,
   dropDownValue,
 }: PostCardType) => {
@@ -96,7 +98,6 @@ export const PostCard = ({
     setIsDelete(false);
   };
 
-  let userName = users.find((user) => user.id === post.userId);
   let isFavorite = favoritePosts.some((item) => item.id === post.id);
   let isMyPost = currentUser?.id === post.userId;
   let editingPost = editPost?.id === post.id;
@@ -113,7 +114,7 @@ export const PostCard = ({
       <div className="rounded-[10px] bg-[#484848] p-[10px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <UserIcon /> <p>{userName?.username}</p>
+            <UserIcon /> <p>{post.user.username}</p>
           </div>
           <RoundCheckbox
             checked={selectedPosts.some((item) => item.id === post.id)}

@@ -2,6 +2,14 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { Post } from "../components/PostCard";
 import type { Comment } from "../types/types";
 
+type GetsPostType = {
+  page: number;
+  limit: number | string;
+  search?: string;
+  sortKey?: string; // ИСПРАВЛЕНО: Добавлен ключ сортировки
+  sortOrder?: "asc" | "desc"; // ИСПРАВЛЕНО: Добавлено направление сортировки
+};
+
 export const postApi = createApi({
   reducerPath: "postsApi",
   baseQuery: fetchBaseQuery({
@@ -11,21 +19,89 @@ export const postApi = createApi({
   endpoints: (builder) => ({
     getPosts: builder.query<
       { posts: Post[]; totalCount: number },
-      { page: number; limit: number | string }
+      GetsPostType
     >({
-      query: ({ page, limit }) => ({
-        url: "/posts",
-        params: {
+      query: ({ page, limit, search, sortKey, sortOrder }) => {
+        const params: Record<string, any> = {
           _page: page,
           _limit: limit === "все" ? 100 : limit,
-        },
-      }),
+          _expand: "user", // Обязательно подтягиваем вложенный объект user от сервера
+        };
+
+        if (search && search.trim() !== "") {
+          params.title_like = search.trim();
+        }
+
+        // === СЕРВЕРНАЯ СОРТИРОВКА ДЛЯ JSON SERVER ===
+        if (sortKey && sortOrder) {
+          params._sort = sortKey;
+          params._order = sortOrder;
+        }
+
+        return {
+          url: "/posts",
+          params,
+        };
+      },
+      providesTags: ["Post"],
       transformResponse: (posts: Post[], meta) => {
         const totalCount = Number(meta?.response?.headers.get("X-Total-Count"));
         return {
           posts,
           totalCount: totalCount || 100,
         };
+      },
+    }),
+
+    addPost: builder.mutation<
+      Post,
+      {
+        post: Omit<Post, "id">;
+        page: number;
+        limit: number | string;
+        search?: string;
+      }
+    >({
+      query: ({ post }) => ({
+        url: "/posts",
+        method: "POST",
+        body: post,
+      }),
+      async onQueryStarted(
+        { page, limit, search, post },
+        { dispatch, queryFulfilled }
+      ) {
+        try {
+          const { data: serverResponse } = await queryFulfilled;
+
+          dispatch(
+            postApi.util.updateQueryData(
+              "getPosts",
+              { page, limit, search: search || "" },
+              (draft) => {
+                const completeNewPost: Post = {
+                  id: serverResponse.id || 101, // Защита на случай фейкового ID от JSONPlaceholder
+                  title: post.title,
+                  body: post.body,
+                  userId: post.userId,
+                  user: {
+                    id: post.user?.id || post.userId,
+                    name: post.user?.name || "Аноним",
+                    username: post.user?.username || "anonymous",
+                  },
+                };
+
+                draft.posts.unshift(completeNewPost);
+
+                if (draft.totalCount) {
+                  draft.totalCount += 1;
+                }
+              }
+            )
+          );
+        } catch (error) {
+          console.error("Ошибка при пессимистичном обновлении кэша:", error);
+        }
       },
     }),
 
@@ -37,24 +113,28 @@ export const postApi = createApi({
 
     updatePost: builder.mutation<
       Post,
-      { post: Post; page: number; limit: number | string }
+      { post: Post; page: number; limit: number | string; search?: string }
     >({
       query: ({ post }) => ({
         url: `/posts/${post.id}`,
-        method: "PATCH", // или "PUT", если JSONPlaceholder требует полной замены
+        method: "PATCH",
         body: post,
       }),
       async onQueryStarted(
-        { post, page, limit },
+        { post, page, limit, search },
         { dispatch, queryFulfilled }
       ) {
         const patchResult = dispatch(
-          postApi.util.updateQueryData("getPosts", { page, limit }, (draft) => {
-            const index = draft.posts.findIndex((p) => p.id === post.id);
-            if (index !== -1) {
-              draft.posts[index] = { ...draft.posts[index], ...post };
+          postApi.util.updateQueryData(
+            "getPosts",
+            { page, limit, search: search || "" },
+            (draft) => {
+              const index = draft.posts.findIndex((p) => p.id === post.id);
+              if (index !== -1) {
+                draft.posts[index] = { ...draft.posts[index], ...post };
+              }
             }
-          })
+          )
         );
         try {
           await queryFulfilled;
@@ -113,6 +193,7 @@ export const postApi = createApi({
 
 export const {
   useGetPostsQuery,
+  useAddPostMutation,
   useGetCommentPostQuery,
   useUpdatePostMutation,
   useDeletePostMutation,

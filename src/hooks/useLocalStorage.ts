@@ -1,6 +1,5 @@
 export const useLocalStorage = () => {
   const setToLS = (name: string, value: any) => {
-    console.log("SETTING TO LS:", name, value);
     const stringValue = JSON.stringify(value);
     localStorage.setItem(name, stringValue);
   };

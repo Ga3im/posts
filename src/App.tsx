@@ -6,6 +6,7 @@ import store from "./store";
 import { PostPage } from "./pages/PostPage";
 import { routes } from "./pages/routes";
 import { UserListPage } from "./pages/UserListPage";
+import { AddingPostPage } from "./pages/AddingPostPage";
 
 function App() {
   return (
@@ -13,7 +14,9 @@ function App() {
       <Provider store={store}>
         <Routes>
           <Route path={routes.main} element={<Main />}>
-            <Route path={routes.post} element={<PostPage />} />
+            <Route path={routes.post} element={<PostPage />} >
+            <Route path={routes.addingPost} element={<AddingPostPage />}/>
+            </Route>
             <Route path={routes.users} element={<UserListPage />} />
           </Route>
         </Routes>
