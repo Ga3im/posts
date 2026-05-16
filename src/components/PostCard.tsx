@@ -114,7 +114,7 @@ export const PostCard = ({
       <div className="rounded-[10px] bg-[#484848] p-[10px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <UserIcon /> <p>{post.user.username}</p>
+            <UserIcon /> <p>{post?.user.username}</p>
           </div>
           <RoundCheckbox
             checked={selectedPosts.some((item) => item.id === post.id)}
@@ -189,16 +189,17 @@ export const PostCard = ({
 
         {openComment && (
           <div className="pt-[10px] px-[20px]">
-            {postComments.map((comment) => (
-              <div
-                key={comment.id}
-                className="border-b-1 text-start pt-[8px] pb-[3px]"
-              >
-                <h3 className="text-white">{comment.name}</h3>
-                <p className="text-[10px]">{comment.email}</p>
-                <p className="text-justify">{comment.body}</p>
-              </div>
-            ))}
+            {postComments &&
+              postComments.map((comment) => (
+                <div
+                  key={comment.id}
+                  className="border-b-1 text-start pt-[8px] pb-[3px]"
+                >
+                  <h3 className="text-white">{comment.name}</h3>
+                  <p className="text-[10px]">{comment.email}</p>
+                  <p className="text-justify">{comment.body}</p>
+                </div>
+              ))}
           </div>
         )}
       </div>

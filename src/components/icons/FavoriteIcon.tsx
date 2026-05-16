@@ -1,4 +1,8 @@
-export const FavoriteIcon = ({ isFavorite }) => (
+type FavoriteIconType = {
+  isFavorite: boolean;
+};
+
+export const FavoriteIcon = ({ isFavorite }: FavoriteIconType) => (
   <svg
     width="18"
     height="18"

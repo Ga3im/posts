@@ -105,7 +105,7 @@ export const postApi = createApi({
       },
     }),
 
-    getCommentPost: builder.query<Comment[], { postId: number }>({
+    getCommentPost: builder.query<Comment[], { postId: number | null }>({
       query: ({ postId }) => ({
         url: `/posts/${postId}/comments`,
       }),

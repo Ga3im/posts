@@ -1,4 +1,8 @@
-export const CommentIcon = ({ isActive }) => (
+type CommentIconType = {
+  isActive: boolean;
+};
+
+export const CommentIcon = ({ isActive }: CommentIconType) => (
   <svg
     width="20"
     height="20"
